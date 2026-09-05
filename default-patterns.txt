@@ -1,0 +1,104 @@
+# Built-in transient / infrastructure failure signatures.
+# One Python regex per line. Blank lines and #-comments are ignored.
+# Matching is case-insensitive and searched anywhere in the failed-job log.
+#
+# Keep these HIGH-CONFIDENCE: a false positive silently burns a rerun, while a
+# false negative just means a human retries by hand. Add project-specific
+# entries via the action's `patterns-file` input instead of editing this file.
+#
+# NOT covered by design: flaky tests. An intermittently-failing test should be
+# fixed or quarantined, not auto-retried — auto-retrying masks the bug. Add a
+# `patterns-file` entry if you really want that for a specific suite.
+
+# --- GitHub API rate limiting (pinact/gh/hk hitting api.github.com) ---
+api rate limit exceeded
+api rate limit of \d+ .{0,40}exceeded
+you have exceeded a secondary rate limit
+\bsecondary rate limit\b
+rate reset in \d
+
+# --- Sigstore / TUF / attestation verification (mise tool installs) ---
+sigstore error
+\btuf error\b
+tuf repository load failed
+error sending request for url
+artifact attestations verification failed
+
+# --- OIDC / trusted publishing ---
+trusted publishing exchange failure
+error: openid connect
+
+# --- curl exit codes ---
+curl: \(6\)
+curl: \(7\)
+curl: \(16\)
+curl: \(18\)
+curl: \(28\)
+curl: \(35\)
+curl: \(52\)
+curl: \(55\)
+curl: \(56\)
+curl: \(92\)
+
+# --- DNS / connection ---
+could not resolve host
+could not resolve proxy
+temporary failure in name resolution
+name or service not known
+connection reset by peer
+connection timed out
+\bconnection refused\b
+no route to host
+network is unreachable
+\bi/o timeout\b
+dial tcp \S+: (connect: )?(connection refused|i/o timeout|no route to host)
+client\.timeout exceeded while awaiting headers
+net/http: request canceled while waiting for connection
+server misbehaving
+
+# --- TLS ---
+tls handshake timeout
+net/http: tls handshake timeout
+gnutls_handshake\(\) failed
+the tls connection was non-properly terminated
+ssl_error_syscall
+
+# --- HTTP 429 / 5xx from a dependency ---
+429 too many requests
+\b(502 bad gateway|503 service unavailable|504 gateway time-?out)\b
+the requested url returned error: 429
+the requested url returned error: 5\d\d
+received a 5\d\d response
+
+# --- package / toolchain download ---
+failed to download
+error downloading
+failed to fetch http
+could not get lock /var/lib/(apt|dpkg)
+temporary failure resolving
+hash sum mismatch
+error: failed to extract
+tar: unexpected eof in archive
+the process '/home/runner/\.local/share/mise/bin/mise' failed .{0,40}(sigstore|tuf|download|fetch|timeout)
+
+# --- git transport ---
+rpc failed; curl
+the remote end hung up unexpectedly
+\bearly eof\b
+fetch-pack: unexpected disconnect
+gnutls recv error
+
+# --- GitHub Actions infra ---
+unable to connect to the github server
+the runner has received a shutdown signal
+lost communication with the server
+failed to download action
+we were unable to download the archive
+creating pages deployment failed
+failed to create deployment \(status: (404|5\d\d)\)
+
+# --- runner resource exhaustion (a fresh runner clears these) ---
+no space left on device
+cannot allocate memory
+fork: retry: resource temporarily unavailable
+received signal 9

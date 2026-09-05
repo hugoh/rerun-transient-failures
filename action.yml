@@ -1,0 +1,91 @@
+name: Rerun Transient Failures
+description: >-
+  Re-run a workflow run's failed jobs once, but only when the failure logs
+  match a known transient / infrastructure signature (network blips, mirror
+  timeouts, apt races, 5xx, runner infra). Never retries a real failure.
+branding:
+  icon: refresh-cw
+  color: yellow
+inputs:
+  run-id:
+    description: The workflow run id to inspect and possibly re-run.
+    required: true
+  token:
+    description: >-
+      A token with `actions: write` on this repository. Defaults to the
+      job's GITHUB_TOKEN.
+    required: false
+    default: ${{ github.token }}
+  patterns-file:
+    description: >-
+      Optional path (in the checked-out repository) to a newline-delimited
+      file of extra regexes to treat as transient. Blank lines and `#`
+      comments are ignored; matching is case-insensitive.
+    required: false
+    default: ""
+  patterns-mode:
+    description: >-
+      `append` (default) adds `patterns-file` entries to the built-in list;
+      `replace` uses only `patterns-file`.
+    required: false
+    default: append
+outputs:
+  reran:
+    description: "`true` if the failed jobs were re-run, `false` otherwise."
+    value: ${{ steps.rerun.outputs.reran }}
+  matched:
+    description: The transient signature that triggered the rerun, if any.
+    value: ${{ steps.rerun.outputs.matched }}
+runs:
+  using: composite
+  steps:
+    - id: rerun
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        RUN_ID: ${{ inputs.run-id }}
+        PATTERNS_FILE: ${{ inputs.patterns-file }}
+        PATTERNS_MODE: ${{ inputs.patterns-mode }}
+      run: |
+        set -euo pipefail
+        reran=false
+        matched=""
+        finish() {
+          {
+            echo "reran=${reran}"
+            echo "matched=${matched}"
+          } >> "$GITHUB_OUTPUT"
+        }
+        trap finish EXIT
+
+        attempt=$(gh run view "$RUN_ID" --json attempt --jq '.attempt')
+        echo "run $RUN_ID is on attempt ${attempt}"
+        if [ "${attempt:-1}" -ge 2 ]; then
+          echo "rerun-transient-failures: run $RUN_ID already retried once — leaving as-is" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+          exit 0
+        fi
+
+        logs=$(gh run view "$RUN_ID" --log-failed 2>/dev/null || true)
+        if [ -z "$logs" ]; then
+          echo "rerun-transient-failures: no failed-job logs for run $RUN_ID — leaving as-is" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+          exit 0
+        fi
+
+        detect_args=()
+        if [ -n "$PATTERNS_FILE" ]; then
+          detect_args+=(--patterns-file "$PATTERNS_FILE" --mode "$PATTERNS_MODE")
+        fi
+
+        if matched=$(printf '%s' "$logs" \
+          | python3 "$GITHUB_ACTION_PATH/detect_transient.py" "${detect_args[@]}"); then
+          echo "rerun-transient-failures: transient signature matched (\`${matched}\`) — re-running failed jobs of run $RUN_ID" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+          gh run rerun "$RUN_ID" --failed
+          reran=true
+        else
+          matched=""
+          echo "rerun-transient-failures: no transient signature in run $RUN_ID's failure logs — leaving as-is" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+        fi

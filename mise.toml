@@ -1,0 +1,22 @@
+[tools]
+hk = "1.57.0"
+uv = "0.12.10"
+actionlint = "1.7.12"
+pinact = "4.1.1"
+zizmor = "1.30.0"
+ghalint = "1.5.6"
+gitleaks = "8.30.1"
+typos = "1.50.1"
+rumdl = "0.2.65"
+shellcheck = "0.11.0"
+"aqua:anordal/shellharden" = "4.3.2"
+shfmt = "3.14.0"
+biome = "2.5.10"
+tombi = "1.5.1"
+"github:owenlamont/ryl" = "0.21.0"
+ruff = "0.16.6"
+ty = "0.0.78"
+
+[tasks.test]
+description = "Run the transient-detection test suite"
+run = "python3 -m unittest discover -p 'test_*.py'"
