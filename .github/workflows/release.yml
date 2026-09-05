@@ -47,7 +47,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NEW_TAG: ${{ steps.tag_version.outputs.new_tag }}
         run: |
-          major="v${NEW_TAG#v}"
-          major="${major%%.*}"
+          git fetch --force origin "refs/tags/${NEW_TAG}:refs/tags/${NEW_TAG}"
+          major="${NEW_TAG%%.*}"
           git tag -f "$major" "$NEW_TAG"
           git push -f origin "refs/tags/${major}"
