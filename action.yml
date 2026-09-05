@@ -1,8 +1,5 @@
 name: Rerun Transient Failures
-description: >-
-  Re-run a workflow run's failed jobs once, but only when the failure logs
-  match a known transient / infrastructure signature (network blips, mirror
-  timeouts, apt races, 5xx, runner infra). Never retries a real failure.
+description: Re-run failed jobs once, only on transient/infra failures (DNS, TLS, timeouts, rate limits) — never a real failure.
 branding:
   icon: refresh-cw
   color: yellow
