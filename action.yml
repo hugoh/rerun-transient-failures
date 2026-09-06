@@ -40,6 +40,7 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
+        GH_REPO: ${{ github.repository }}
         RUN_ID: ${{ inputs.run-id }}
         PATTERNS_FILE: ${{ inputs.patterns-file }}
         PATTERNS_MODE: ${{ inputs.patterns-mode }}
