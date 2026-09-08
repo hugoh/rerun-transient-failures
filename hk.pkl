@@ -8,6 +8,11 @@ local linters = new Mapping<String, Step> {
     ...Base.base
     ...Base.python
     ...Base.shell
+    ["readme-gen"] = {
+        glob = List("action.yml", "README.md", "mise.toml")
+        check = "mise run gen-check"
+        fix = "mise run gen"
+    }
     ["tests"] = {
         check = "python3 -m unittest discover -p 'test_*.py'"
         profiles = List("ci")
