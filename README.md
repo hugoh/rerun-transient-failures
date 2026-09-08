@@ -42,12 +42,16 @@ push-to-default and same-repo pull requests. Fork PRs are not covered (their
 
 ## Inputs
 
-| Input | Required | Default | Description |
-|---|---|---|---|
-| `run-id` | yes | — | The workflow run id to inspect and possibly re-run. |
-| `token` | no | `${{ github.token }}` | A token with `actions: write` on the repo. |
-| `patterns-file` | no | `""` | Path (in the checked-out repo) to a file of extra transient regexes. |
-| `patterns-mode` | no | `append` | `append` adds to the built-in list; `replace` uses only `patterns-file`. |
+<!-- AUTO-DOC-INPUT:START - Do not remove or modify this section -->
+
+|     INPUT     | REQUIRED |         DEFAULT         |                                                                                        DESCRIPTION                                                                                        |
+|---------------|----------|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| patterns-file |  false   |                         | Optional path (in the checked-out repository) to a newline-delimited file of extra regexes to treat as transient. Blank lines and `#` comments are ignored; matching is case-insensitive. |
+| patterns-mode |  false   |       `"append"`        |                                        `append` (default) adds `patterns-file` entries to the built-in list; `replace` uses only `patterns-file`.                                         |
+|    run-id     |   true   |                         |                                                                    The workflow run id to inspect and possibly re-run.                                                                    |
+|     token     |  false   | `"${{ github.token }}"` |                                                   A token with `actions: write` on this repository. Defaults to the job's GITHUB_TOKEN.                                                   |
+
+<!-- AUTO-DOC-INPUT:END -->
 
 To use `patterns-file` you must check the repo out first:
 
@@ -62,10 +66,14 @@ To use `patterns-file` you must check the repo out first:
 
 ## Outputs
 
-| Output | Description |
-|---|---|
-| `reran` | `true` if the failed jobs were re-run, else `false`. |
-| `matched` | The transient signature that triggered the rerun, if any. |
+<!-- AUTO-DOC-OUTPUT:START - Do not remove or modify this section -->
+
+| OUTPUT  |                        DESCRIPTION                        |
+|---------|-----------------------------------------------------------|
+| matched | The transient signature that triggered the rerun, if any. |
+|  reran  | `true` if the failed jobs were re-run, `false` otherwise. |
+
+<!-- AUTO-DOC-OUTPUT:END -->
 
 ## What counts as transient
 
