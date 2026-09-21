@@ -55,6 +55,12 @@ TRANSIENT_SAMPLES = (
         "##[error]Error: Failed to create deployment (status: 404) with build version abc123"
     ),
     "HTTP status server error (504 Gateway Timeout) for url",
+    # mise install: GitHub Releases returning a transient 500 (jdx/hk#... 2026-09-21)
+    (
+        "mise ERROR Failed to install packslip:github.com/jdx/hk@2.0.1: HTTP status "
+        "server error (500 Internal Server Error) for url "
+        "(https://github.com/jdx/hk/releases/download/v2.0.1/hk-x86_64-unknown-linux-gnu.tar.gz)"
+    ),
 )
 
 REAL_FAILURE_SAMPLES = (

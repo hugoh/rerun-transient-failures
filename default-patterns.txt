@@ -65,10 +65,11 @@ ssl_error_syscall
 
 # --- HTTP 429 / 5xx from a dependency ---
 429 too many requests
-\b(502 bad gateway|503 service unavailable|504 gateway time-?out)\b
+\b(500 internal server error|502 bad gateway|503 service unavailable|504 gateway time-?out)\b
 the requested url returned error: 429
 the requested url returned error: 5\d\d
 received a 5\d\d response
+http status server error \(5\d\d
 
 # --- package / toolchain download ---
 failed to download
